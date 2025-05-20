@@ -2,34 +2,33 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/nursultan/go-project-nurs/internal/db"
 	"github.com/nursultan/go-project-nurs/internal/handler"
 	"github.com/nursultan/go-project-nurs/internal/models"
 	"github.com/nursultan/go-project-nurs/internal/repository"
 	"github.com/nursultan/go-project-nurs/internal/routes"
 	"github.com/nursultan/go-project-nurs/internal/service"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"log"
 )
 
 func main() {
-	dsn := "postgres://nurs:4469@localhost:5432/postgres?sslmode=disable"
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Error connecting to the database:", err)
-	}
+	// Базамен байланыс және миграция
+	db.InitDB()
 
-	err = db.AutoMigrate(&models.Book{})
-	if err != nil {
-		log.Fatal("Error on migrating to the DB:", err)
-	}
+	// GORM арқылы база объектісін алу
+	database := db.DB
 
-	bookRepo := repository.NewBookRepository(db)
+	// Авто миграция (қаласаң қалдыруға да болады, себебі migrate бар)
+	database.AutoMigrate(&models.Book{})
+
+	// Репозиторий → Сервис → Хендлер
+	bookRepo := repository.NewBookRepository(database)
 	bookService := service.NewBookService(bookRepo)
 	bookHandler := handler.NewBookHandler(bookService)
 
+	// Gin маршруты
 	r := gin.Default()
 	routes.SetupRoutes(r, bookHandler)
 
+	// Серверді қосу
 	r.Run(":8080")
 }

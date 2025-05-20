@@ -18,7 +18,7 @@ func main() {
 	database := db.DB
 
 	// Авто миграция (қаласаң қалдыруға да болады, себебі migrate бар)
-	database.AutoMigrate(&models.Book{})
+	database.AutoMigrate(&models.User{})
 
 	// Репозиторий → Сервис → Хендлер
 	bookRepo := repository.NewBookRepository(database)

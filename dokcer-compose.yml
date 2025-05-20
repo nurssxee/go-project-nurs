@@ -12,6 +12,24 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+  app:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      container_name: go-app
+      environment:
+        DB_HOST: db
+        DB_PORT: 5432
+        DB_USER: nurs
+        DB_PASSWORD: 4469
+        DB_NAME: localhost
+      ports:
+        - "8000:8080"
+      depends_on:
+        - db
+      volumes:
+        - ../internal/db/migrations:/app/internal/db/migrations
+
 
 volumes:
   pgdata:
